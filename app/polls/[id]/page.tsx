@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 
 // Mock data for a single poll
 const mockPoll = {
@@ -22,78 +25,131 @@ const mockPoll = {
 };
 
 export default function PollPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
+  const [isVoting, setIsVoting] = useState(false);
 
-  const handleVote = () => {
-    if (selectedOption) {
-      // This is a placeholder for actual voting logic
-      console.log('Voted for option:', selectedOption);
-      setHasVoted(true);
-    }
+  const handleVote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedOption) return;
+
+    setIsVoting(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    console.log(`Voted for option: ${selectedOption}`);
+    setIsVoting(false);
+    setHasVoted(true);
+    
+    // In a real implementation, we would refresh the data
+    // router.refresh();
   };
 
   // Calculate percentages for the progress bars
   const getPercentage = (votes: number) => {
     return mockPoll.totalVotes > 0 ? Math.round((votes / mockPoll.totalVotes) * 100) : 0;
   };
+  
+  // Format date to a more readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <Card className="max-w-3xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl">{mockPoll.title}</CardTitle>
-          <CardDescription>{mockPoll.description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {mockPoll.options.map((option) => (
-            <div key={option.id} className="space-y-2">
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id={option.id}
-                  name="poll-option"
-                  value={option.id}
-                  onChange={() => setSelectedOption(option.id)}
-                  disabled={hasVoted}
-                  className="mr-2"
-                />
-                <label htmlFor={option.id} className="flex-1">
-                  {option.text}
-                </label>
-                <span className="text-sm font-medium">
-                  {getPercentage(option.votes)}%
-                </span>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Poll Details</h1>
+        <Link href="/polls">
+          <Button variant="outline">Back to Polls</Button>
+        </Link>
+      </div>
+      
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">{mockPoll.title}</CardTitle>
+              <CardDescription className="text-base mt-2">{mockPoll.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleVote}>
+                <div className="space-y-6">
+                  {mockPoll.options.map((option) => (
+                    <div key={option.id} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id={option.id}
+                            name="poll-option"
+                            value={option.id}
+                            onChange={() => setSelectedOption(option.id)}
+                            disabled={hasVoted}
+                            className="mr-2"
+                          />
+                          <label htmlFor={option.id} className="font-medium text-base">
+                            {option.text}
+                          </label>
+                        </div>
+                        <span className="text-sm font-medium">
+                          {getPercentage(option.votes)}%
+                        </span>
+                      </div>
+                      <Progress value={getPercentage(option.votes)} className="h-2" />
+                      <div className="text-sm text-muted-foreground">
+                        {option.votes} votes
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {!hasVoted ? (
+                  <Button 
+                    type="submit" 
+                    className="mt-6 w-full md:w-auto" 
+                    disabled={!selectedOption || isVoting}
+                  >
+                    {isVoting ? 'Voting...' : 'Submit Vote'}
+                  </Button>
+                ) : (
+                  <div className="mt-6 p-4 bg-muted rounded-md text-center">
+                    Thank you for voting!
+                  </div>
+                )}
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Poll Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Created by</h3>
+                  <p>{mockPoll.createdBy}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Created on</h3>
+                  <p>{formatDate(mockPoll.createdAt)}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Total votes</h3>
+                  <p>{mockPoll.totalVotes}</p>
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-primary h-2.5 rounded-full"
-                  style={{ width: `${getPercentage(option.votes)}%` }}
-                ></div>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {option.votes} votes
-              </p>
-            </div>
-          ))}
-
-          <div className="pt-4">
-            <p className="text-sm text-muted-foreground">
-              Total votes: {mockPoll.totalVotes}
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">
-              Created by {mockPoll.createdBy} on {mockPoll.createdAt}
-            </p>
-          </div>
-          <Button onClick={handleVote} disabled={!selectedOption || hasVoted}>
-            {hasVoted ? 'Voted' : 'Vote'}
-          </Button>
-        </CardFooter>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,30 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
-    // This is a placeholder for actual authentication logic
-    // In a real application, you would validate credentials against a database
-    if (email && password) {
-      // Mock successful authentication
-      return NextResponse.json(
-        {
-          user: {
-            id: '1',
-            name: 'Test User',
-            email,
-          },
-          message: 'Authentication successful',
-        },
-        { status: 200 }
-      );
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
     }
 
-    // Invalid credentials
     return NextResponse.json(
-      { error: 'Invalid credentials' },
-      { status: 401 }
+      {
+        user: data.user,
+        message: 'Authentication successful',
+      },
+      { status: 200 }
     );
   } catch (error) {
     console.error('Authentication error:', error);

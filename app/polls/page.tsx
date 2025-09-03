@@ -1,109 +1,140 @@
+'use client';
+
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 // Mock data for polls
-const mockPolls = [
+const polls = [
   {
     id: '1',
-    title: 'Favorite Programming Language',
-    description: 'What is your favorite programming language?',
-    options: ['JavaScript', 'Python', 'Java', 'C#', 'Go'],
-    votes: 42,
-    createdBy: 'John Doe',
+    title: 'What is your favorite programming language?',
+    description: 'Please select the programming language you enjoy working with the most.',
+    optionsCount: 4,
+    totalVotes: 126,
+    createdBy: 'user@example.com',
     createdAt: '2023-05-15',
+    endDate: '2023-06-15',
+    isActive: true,
   },
   {
     id: '2',
-    title: 'Best Frontend Framework',
-    description: 'Which frontend framework do you prefer?',
-    options: ['React', 'Vue', 'Angular', 'Svelte'],
-    votes: 38,
-    createdBy: 'Jane Smith',
+    title: 'Which frontend framework do you prefer?',
+    description: 'Vote for your preferred frontend framework or library.',
+    optionsCount: 5,
+    totalVotes: 89,
+    createdBy: 'user@example.com',
     createdAt: '2023-05-10',
+    endDate: '2023-06-10',
+    isActive: true,
   },
   {
     id: '3',
-    title: 'Preferred Database',
-    description: 'What database do you use most often?',
-    options: ['PostgreSQL', 'MySQL', 'MongoDB', 'SQLite', 'Redis'],
-    votes: 27,
-    createdBy: 'Alex Johnson',
+    title: 'How often do you deploy to production?',
+    description: 'Share your deployment frequency.',
+    optionsCount: 4,
+    totalVotes: 72,
+    createdBy: 'user@example.com',
     createdAt: '2023-05-05',
+    endDate: '2023-05-20',
+    isActive: false,
+  },
+  {
+    id: '4',
+    title: 'What database do you use for your projects?',
+    description: 'Share your preferred database technology.',
+    optionsCount: 6,
+    totalVotes: 103,
+    createdBy: 'user@example.com',
+    createdAt: '2023-05-18',
+    endDate: '2023-06-18',
+    isActive: true,
+  },
+  {
+    id: '5',
+    title: 'Which cloud provider do you prefer?',
+    description: 'Vote for your favorite cloud service provider.',
+    optionsCount: 5,
+    totalVotes: 94,
+    createdBy: 'user@example.com',
+    createdAt: '2023-05-12',
+    endDate: '2023-06-12',
+    isActive: true,
+  },
+  {
+    id: '6',
+    title: 'How do you manage state in your React applications?',
+    description: 'Share your preferred state management approach.',
+    optionsCount: 5,
+    totalVotes: 67,
+    createdBy: 'user@example.com',
+    createdAt: '2023-05-08',
+    endDate: '2023-05-22',
+    isActive: false,
   },
 ];
 
 export default function PollsPage() {
+  // Format date to a more readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Alx Polly</h1>
+        <h1 className="text-3xl font-bold">All Polls</h1>
         <Link href="/polls/create">
-          <Button className="bg-primary hover:bg-primary/90">Create New Poll</Button>
+          <Button>Create New Poll</Button>
         </Link>
       </div>
-      
-      <div className="flex flex-col items-center mb-10">
-        <div className="flex gap-8 mb-8">
-          <Link href="/polls/create">
-            <Card className="w-48 h-48 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition-shadow">
-              <CardHeader className="text-center pb-2">
-                <CardTitle>Create Polls</CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center justify-center">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          
-          <Link href="/polls">
-            <Card className="w-48 h-48 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition-shadow">
-              <CardHeader className="text-center pb-2">
-                <CardTitle>My Polls</CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center justify-center">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                    <path d="M12 20V10"></path>
-                    <path d="M18 20V4"></path>
-                    <path d="M6 20v-4"></path>
-                  </svg>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-      </div>
 
-      <h2 className="text-2xl font-semibold mb-6">Recent Polls</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockPolls.map((poll) => (
-          <Link key={poll.id} href={`/polls/${poll.id}`}>
-            <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle>{poll.title}</CardTitle>
-                <CardDescription>{poll.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  {poll.options.length} options • {poll.votes} votes
-                </p>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Created by {poll.createdBy}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {poll.createdAt}
-                </p>
-              </CardFooter>
-            </Card>
-          </Link>
+        {polls.map((poll) => (
+          <Card key={poll.id} className="flex flex-col h-full">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-xl">{poll.title}</CardTitle>
+                {poll.isActive ? (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    Active
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">
+                    Closed
+                  </Badge>
+                )}
+              </div>
+              <CardDescription className="line-clamp-2 mt-2">
+                {poll.description}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pb-2 flex-grow">
+              <div className="grid grid-cols-2 gap-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Options:</span> {poll.optionsCount}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Votes:</span> {poll.totalVotes}
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">Created:</span> {formatDate(poll.createdAt)}
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">Ends:</span> {formatDate(poll.endDate)}
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="pt-2">
+              <Link href={`/polls/${poll.id}`} className="w-full">
+                <Button variant="outline" className="w-full">
+                  View Details
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
         ))}
       </div>
     </div>

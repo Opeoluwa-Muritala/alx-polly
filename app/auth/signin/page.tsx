@@ -5,15 +5,24 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/app/auth/context/auth-context';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { signIn } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This is a placeholder for authentication logic
-    console.log('Sign in with:', email, password);
+    setError(null);
+
+    try {
+      await signIn(email, password);
+      window.location.href = '/polls';
+    } catch (error: any) {
+      setError(error.message);
+    }
   };
 
   return (
@@ -52,6 +61,7 @@ export default function SignIn() {
                 required
               />
             </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full">

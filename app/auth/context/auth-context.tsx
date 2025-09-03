@@ -1,15 +1,12 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-} | null;
+import { supabase } from '@/lib/supabase';
+import { Session, User } from '@supabase/supabase-js';
 
 type AuthContextType = {
-  user: User;
+  user: User | null;
+  session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
@@ -19,87 +16,60 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
-    // This is a placeholder for actual authentication check
-    const checkAuth = async () => {
-      try {
-        // Simulate checking auth state
-        setTimeout(() => {
-          setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Auth check error:', error);
-        setLoading(false);
-      }
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
+      setLoading(false);
     };
 
-    checkAuth();
+    getSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    // This is a placeholder for actual sign in logic
-    try {
-      setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setUser({
-          id: '1',
-          name: 'Test User',
-          email: email,
-        });
-        setLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Sign in error:', error);
-      setLoading(false);
-      throw error;
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   };
 
   const signUp = async (name: string, email: string, password: string) => {
-    // This is a placeholder for actual sign up logic
-    try {
-      setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setUser({
-          id: '1',
-          name: name,
-          email: email,
-        });
-        setLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Sign up error:', error);
-      setLoading(false);
-      throw error;
-    }
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+        },
+      },
+    });
+    if (error) throw error;
   };
 
   const signOut = async () => {
-    // This is a placeholder for actual sign out logic
-    try {
-      setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setUser(null);
-        setLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Sign out error:', error);
-      setLoading(false);
-      throw error;
-    }
+    await supabase.auth.signOut();
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        session,
         loading,
         signIn,
         signUp,
